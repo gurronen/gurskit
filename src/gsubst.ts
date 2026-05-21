@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { readFile, readdir, stat } from "node:fs/promises";
-import { dirname, join, relative, resolve } from "node:path";
+import { join, relative, resolve } from "node:path";
 
 type Repo = {
   dir: string;
@@ -11,10 +11,6 @@ type Repo = {
 const root = process.cwd();
 const maxGitHubConcurrency = 8;
 const defaultBranches = new Set(["main", "master"]);
-const cacheTtlMs = 5 * 60 * 1000;
-const cachePath = join(process.env.XDG_CACHE_HOME || join(process.env.HOME || root, ".cache"), "gurskit", "prs.json");
-
-type PrCache = Record<string, { pr: string; expiresAt: number }>;
 
 async function exists(path: string): Promise<boolean> {
   try {
@@ -115,29 +111,12 @@ function githubCliHostsToken(): string {
   }
 }
 
-function readCache(): PrCache {
-  try {
-    return JSON.parse(readFileSync(cachePath, "utf8")) as PrCache;
-  } catch {
-    return {};
-  }
-}
-
-function writeCache(cache: PrCache) {
-  mkdirSync(dirname(cachePath), { recursive: true });
-  writeFileSync(cachePath, JSON.stringify(cache));
-}
-
-async function prNumber(repo: Repo, branch: string, cache: PrCache): Promise<string> {
+async function prNumber(repo: Repo, branch: string): Promise<string> {
   if (defaultBranches.has(branch)) return "";
 
   const remote = await originUrl(repo);
   const repoName = githubRepo(remote);
   if (!repoName) return "";
-
-  const cacheKey = `${repoName}:${branch}`;
-  const cached = cache[cacheKey];
-  if (cached && cached.expiresAt > Date.now()) return cached.pr;
 
   const [owner, name] = repoName.split("/");
 
@@ -150,11 +129,8 @@ async function prNumber(repo: Repo, branch: string, cache: PrCache): Promise<str
       head: `${owner}:${branch}`,
       per_page: 1,
     });
-    const pr = data[0]?.number ? String(data[0].number) : "";
-    cache[cacheKey] = { pr, expiresAt: Date.now() + cacheTtlMs };
-    return pr;
+    return data[0]?.number ? String(data[0].number) : "";
   } catch {
-    cache[cacheKey] = { pr: "", expiresAt: Date.now() + cacheTtlMs };
     return "";
   }
 }
@@ -175,13 +151,11 @@ async function mapLimited<T, R>(items: T[], limit: number, fn: (item: T) => Prom
 }
 
 const repos = await findRepos(root);
-const cache = readCache();
 const lines = await mapLimited(repos, maxGitHubConcurrency, async (repo) => {
   const branch = await branchName(repo);
-  const pr = await prNumber(repo, branch, cache);
+  const pr = await prNumber(repo, branch);
   return `${repo.relativeDir} (${branch})${pr ? ` (#${pr})` : ""}`;
 });
-writeCache(cache);
 
 for (const line of lines) {
   console.log(line);
