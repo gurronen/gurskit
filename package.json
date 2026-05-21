@@ -1,0 +1,19 @@
+{
+  "name": "gurskit",
+  "version": "0.1.0",
+  "description": "Gurr's local helper commands.",
+  "type": "module",
+  "bin": {
+    "gsubst": "./dist/gsubst",
+    "gcloneout": "./dist/gcloneout"
+  },
+  "scripts": {
+    "build": "bun build ./src/gsubst.ts --compile --outfile ./dist/gsubst && bun build ./src/gcloneout.ts --compile --outfile ./dist/gcloneout",
+    "link:global": "bun run build && bun link",
+    "check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "latest"
+  }
+}
