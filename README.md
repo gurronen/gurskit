@@ -24,11 +24,14 @@ repo-name-clones/repo-name-1
 repo-name-clones/repo-name-2
 ```
 
-## Develop
+## Setup
 
 ```bash
+git clone <repo-url>
+cd gurskit
 bun install
-bun run check
 bun run build
 bun link
 ```
+
+After linking, `gsubst` and `gcloneout` are available from your shell.

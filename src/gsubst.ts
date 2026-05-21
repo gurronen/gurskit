@@ -102,7 +102,8 @@ function githubRepo(remoteUrl: string): string | undefined {
 
 async function githubClient(): Promise<Octokit> {
   const { Octokit } = await import("@octokit/rest");
-  const auth = process.env.GH_TOKEN || process.env.GITHUB_TOKEN || githubCliHostsToken();
+  const auth =
+    process.env.GH_TOKEN || process.env.GITHUB_TOKEN || githubCliHostsToken();
 
   return new Octokit({
     ...(auth ? { auth } : {}),
@@ -146,7 +147,11 @@ async function prNumber(repo: Repo, branch: string): Promise<string> {
   }
 }
 
-async function mapLimited<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+async function mapLimited<T, R>(
+  items: T[],
+  limit: number,
+  fn: (item: T) => Promise<R>,
+): Promise<R[]> {
   const results = new Array<R>(items.length);
   let index = 0;
 
@@ -157,7 +162,9 @@ async function mapLimited<T, R>(items: T[], limit: number, fn: (item: T) => Prom
     }
   }
 
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  await Promise.all(
+    Array.from({ length: Math.min(limit, items.length) }, worker),
+  );
   return results;
 }
 

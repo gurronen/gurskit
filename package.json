@@ -9,7 +9,6 @@
   },
   "scripts": {
     "build": "bun build ./src/gsubst.ts --compile --outfile ./dist/gsubst && bun build ./src/gcloneout.ts --compile --outfile ./dist/gcloneout",
-    "link:global": "bun run build && bun link",
     "check": "tsc --noEmit"
   },
   "devDependencies": {
