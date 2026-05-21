@@ -8,8 +8,14 @@ function usage(): never {
 
 const [repo, rawCount] = process.argv.slice(2);
 
-if (!repo || !rawCount || process.argv.length !== 4) usage();
-if (!/^[^/\s]+\/[^/\s]+$/.test(repo)) usage();
+if (!repo || !rawCount || process.argv.length !== 4) {
+  usage();
+}
+
+if (!/^[^/\s]+\/[^/\s]+$/.test(repo)) {
+  usage();
+}
+
 if (!/^[1-9][0-9]*$/.test(rawCount)) {
   console.error("NUMBER must be a positive integer");
   process.exit(2);
@@ -39,5 +45,8 @@ for (let i = 1; i <= count; i++) {
     stderr: "inherit",
   });
   const code = await proc.exited;
-  if (code !== 0) process.exit(code);
+
+  if (code !== 0) {
+    process.exit(code);
+  }
 }

@@ -2,6 +2,7 @@
 import { readFileSync } from "node:fs";
 import { readFile, readdir, stat } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
+import type { Octokit } from "@octokit/rest";
 
 type Repo = {
   dir: string;
@@ -55,13 +56,22 @@ async function read(path: string): Promise<string> {
 async function gitDir(repo: Repo): Promise<string> {
   const dotGit = join(repo.dir, ".git");
   const info = await read(dotGit);
-  if (info.startsWith("gitdir:")) return resolve(repo.dir, info.slice("gitdir:".length).trim());
+
+  if (info.startsWith("gitdir:")) {
+    return resolve(repo.dir, info.slice("gitdir:".length).trim());
+  }
+
   return dotGit;
 }
 
 async function branchName(repo: Repo): Promise<string> {
   const head = (await read(join(await gitDir(repo), "HEAD"))).trim();
-  return head.startsWith("ref: refs/heads/") ? head.slice("ref: refs/heads/".length) : head.slice(0, 7) || "unknown";
+
+  if (head.startsWith("ref: refs/heads/")) {
+    return head.slice("ref: refs/heads/".length);
+  }
+
+  return head.slice(0, 7) || "unknown";
 }
 
 async function originUrl(repo: Repo): Promise<string> {
@@ -90,9 +100,10 @@ function githubRepo(remoteUrl: string): string | undefined {
   return match?.[1];
 }
 
-async function githubClient() {
+async function githubClient(): Promise<Octokit> {
   const { Octokit } = await import("@octokit/rest");
   const auth = process.env.GH_TOKEN || process.env.GITHUB_TOKEN || githubCliHostsToken();
+
   return new Octokit({
     ...(auth ? { auth } : {}),
     log: { debug() {}, info() {}, warn() {}, error() {} },
@@ -154,7 +165,12 @@ const repos = await findRepos(root);
 const lines = await mapLimited(repos, maxGitHubConcurrency, async (repo) => {
   const branch = await branchName(repo);
   const pr = await prNumber(repo, branch);
-  return `${repo.relativeDir} (${branch})${pr ? ` (#${pr})` : ""}`;
+
+  if (pr) {
+    return `${repo.relativeDir} (${branch}) (#${pr})`;
+  }
+
+  return `${repo.relativeDir} (${branch})`;
 });
 
 for (const line of lines) {
