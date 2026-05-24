@@ -5,10 +5,11 @@
   "type": "module",
   "bin": {
     "gsubst": "./dist/gsubst",
-    "gcloneout": "./dist/gcloneout"
+    "gcloneout": "./dist/gcloneout",
+    "ncloneout": "./dist/ncloneout"
   },
   "scripts": {
-    "build": "bun build ./src/gsubst.ts --compile --outfile ./dist/gsubst && bun build ./src/gcloneout.ts --compile --outfile ./dist/gcloneout",
+    "build": "bun build ./src/gsubst.ts --compile --outfile ./dist/gsubst && bun build ./src/gcloneout.ts --compile --outfile ./dist/gcloneout && bun build ./src/ncloneout.ts --compile --outfile ./dist/ncloneout",
     "check": "tsc --noEmit"
   },
   "devDependencies": {
