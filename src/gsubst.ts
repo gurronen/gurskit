@@ -10,6 +10,7 @@ type Repo = {
 };
 
 const root = process.cwd();
+const scanRoot = resolve(root, process.argv[2] ?? ".");
 const maxGitHubConcurrency = 8;
 const defaultBranches = new Set(["main", "master"]);
 
@@ -35,7 +36,9 @@ async function findRepos(dir: string, repos: Repo[] = []): Promise<Repo[]> {
     return repos;
   }
 
-  entries.sort((a, b) => b.name.localeCompare(a.name));
+  entries.sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { numeric: true }),
+  );
 
   for (const entry of entries) {
     if (!entry.isDirectory() || entry.name === "node_modules") continue;
@@ -168,7 +171,7 @@ async function mapLimited<T, R>(
   return results;
 }
 
-const repos = await findRepos(root);
+const repos = await findRepos(scanRoot);
 const lines = await mapLimited(repos, maxGitHubConcurrency, async (repo) => {
   const branch = await branchName(repo);
   const pr = await prNumber(repo, branch);
