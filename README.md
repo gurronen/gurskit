@@ -5,12 +5,12 @@ Gurr's helper commands, implemented as self-contained Bun-built CLIs.
 ## Commands
 
 ```bash
-gsubst
+gsubst [path]
 gcloneout org-name/repo-name NUMBER
 ncloneout repo-name [NUMBER]
 ```
 
-`gsubst` scans from the current directory down for Git repositories and prints:
+`gsubst` scans from the current directory, or from `path` when provided, down for Git repositories and prints paths relative to the current directory:
 
 ```text
 ./repo-dir (branch-name) (#123)
