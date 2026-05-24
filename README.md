@@ -7,6 +7,7 @@ Gurr's helper commands, implemented as self-contained Bun-built CLIs.
 ```bash
 gsubst
 gcloneout org-name/repo-name NUMBER
+ncloneout repo-name [NUMBER]
 ```
 
 `gsubst` scans from the current directory down for Git repositories and prints:
@@ -24,6 +25,15 @@ repo-name-clones/repo-name-1
 repo-name-clones/repo-name-2
 ```
 
+`ncloneout` creates a new private empty GitHub repo under your authenticated account, then clones it into five checkouts by default:
+
+```text
+repo-name-clones/repo-name-1
+repo-name-clones/repo-name-2
+```
+
+Pass `NUMBER` to override the default checkout count.
+
 ## Setup
 
 ```bash
@@ -34,4 +44,4 @@ bun run build
 bun link
 ```
 
-After linking, `gsubst` and `gcloneout` are available from your shell.
+After linking, `gsubst`, `gcloneout`, and `ncloneout` are available from your shell.
